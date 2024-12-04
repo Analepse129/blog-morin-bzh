@@ -1,0 +1,6 @@
+---
+asdf_plugins:
+  - name: opentofu
+    url: https://github.com/defenseunicorns/asdf-opentofu
+  - name: terragrunt
+    url: https://github.com/lotia/asdf-terragrunt
