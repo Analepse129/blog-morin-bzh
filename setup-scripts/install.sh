@@ -5,10 +5,11 @@ PROFILE_FILES=(".profile" ".zprofile" ".bash_profile" ".bashrc" ".zshrc" ".confi
 HOME_PATH=$HOME
 
 # Packages & definitions
+declare -A PACKAGES
 PACKAGES=(
-    ['oh-my-posh']="eval \$(oh-my-posh init bash)"
-    ['bat']="alias cat='bat'"
-    ['lsd']="alias ls='lsd'"
+    [oh-my-posh]="eval \$(oh-my-posh init bash)"
+    [bat]="alias cat='bat'"
+    [lsd]="alias ls='lsd -la'"
     [asdf]=""
 )
 
@@ -77,7 +78,7 @@ welcome(){
             "eval \$(/opt/homebrew/bin/brew shellenv)"
         )
         if [[ ! -x "$(command -v brew)" ]]; then
-            echo -e "\033[0;36m ⚠️ Homebrew is not installed.\n\033[0;33m ⚙️ Installing Homebrew...\033[0m"
+            echo -e "\n\033[0;36m ⚠️ Homebrew is not installed.\n\033[0;33m ⚙️ Installing Homebrew...\033[0m"
             NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" > /dev/null
             echo -e "\033[0;33m ⚙️ Initializing homebrew... \n\033[0m"
             if [ OS == "mac" ]; then
@@ -180,24 +181,23 @@ configure_tools() {
     install_packages(){
         for package in "${!PACKAGES[@]}"; do
             echo -e "\033[0;33m ⚙️ Installing $package...\033[0m"
-            brew install $package || echo -e "\033[0;31m ❌ Error: $package could not be installed.\033[0m"
+            brew install "$package" > /dev/null 2>&1  || echo -e "\033[0;31m ❌ Error: $package could not be installed.\033[0m"
         done
     }
 
     configure_packages(){
         for package in "${!PACKAGES[@]}"; do
             echo -e "\033[0;33m ⚙️ Configuring $package...\033[0m"
-            echo "${!PACKAGES[$package]}" >> $PROFILE_FILE || echo -e "\033[0;31m ❌ Error: $package could not be configured.\033[0m"
+            echo "${PACKAGES[$package]}" >> "$PROFILE_FILE" || echo -e "\033[0;31m ❌ Error: $package could not be configured.\033[0m"
             sleep 1
         done
     }
 
     echo -e "\033[0;36m ℹ️ Preparing packages installation...\033[0m"
-    declare -A PACKAGES
     install_packages
     configure_packages
     echo -e "\033[0;33m ⚙️ Reloading the shell...\033[0m"
-    source "$PROFILE_FILE" || echo -e "\033[0;31m ❌ Error: the shell could not be reloaded.\033[0m"
+    source "$PROFILE_FILE" && sleep 1 || echo -e "\033[0;31m ❌ Error: the shell could not be reloaded.\033[0m"
     echo -e "\033[0;32m ✅ All packages have been installed and configured successfully.\n\033[0m"
 }
 
