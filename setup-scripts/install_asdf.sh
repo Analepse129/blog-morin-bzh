@@ -56,20 +56,6 @@ welcome(){
             echo -e "\033[0;32m ✅ Homebrew is already installed.\n\033[0m"
         fi
     }
-
-    check_package_manager(){
-        if command -v apt-get > /dev/null ; then
-            PACKAGE_MGR="apt-get"
-        elif command -v yum > /dev/null; then
-            PACKAGE_MGR="yum"
-        elif command -v dnf > /dev/null; then
-            PACKAGE_MGR="dnf"
-        else
-            echo -e "\033[0;31m ❌ Error: your package manager is not currently supported by this script or no package manager was found.\033[0m"
-            exit 1
-        fi
-        echo -e "\033[0;36m ℹ️ The package manager is $PACKAGE_MGR.\n\033[0m"
-    }
     
     variables_selections(){
         echo -e -n "\033[0;36m ℹ️ This tool requires several information to run correctly. If you don't know what to put, leave default.\n\033[0m"
@@ -207,46 +193,46 @@ check_config_file() {
     echo -e "\033[0;36m ℹ️ The selected config file is '$CONFIGFILE'.\n\033[0m"
 }
 
-get_asdf() {
-    # Clones the ASDF repository
-    echo -e "\033[0;33m ⌛ Cloning the ASDF repository...\033[0m"
-    git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch $ASDF_VERSION > /dev/null 2>&1 || { echo -e "\033[0;31m ❌ An error occurred while cloning the ASDF repository.\033[0m"; exit 1; }
-}
-
-update_asdf() {
-    echo -e -n "\033[0;36m ASDF is already installed in version $VERSION_FROM_FILE. Do you want to update it to version $ASDF_VERSION? [y/n] " 
-    read response
-    if [[ "$response" =~ ^([yY][eE][sS]|[yY]|[oO])$ ]]; then
-        echo -e "\033[0;33m ⌛ Updating ASDF to version $ASDF_VERSION...\033[0m"
-        rm -rf "$HOME/.asdf" > /dev/null 2>&1 || { echo -e "\033[0;31m ❌ An error occurred while removing ASDF folder.\033[0m"; exit 1; }
-        get_asdf
-    elif [[ "$response" =~ ^([nN][oO]|[nN])$ ]]; then
-        echo -e "\033[0;36m ⚠️ The installation of ASDF has been canceled.\033[0m"
-        exit 0
-    else
-        echo -e "\033[0;31m ❌ Error: invalid response.\033[0m"
-        exit 1
-    fi
-    echo -e "\033[0;33m ⌛ Updating ASDF to version $ASDF_VERSION...\033[0m"
-    echo "$SUDO_PASSWORD" | sudo -S rm -rf "$HOME/.asdf" > /dev/null 2>&1 || { echo -e "\033[0;31m ❌ An error occurred while updating ASDF.\033[0m"; exit 1; }
-    get_asdf
-}
-
-configure_asdf() {
-    # Adds the ASDF configuration to the shell configuration file
-    local perm_file=".asdf/asdf.sh"
-    echo -e "\033[0;33m ⌛ Configuring ASDF...\033[0m"
-    chmod +x "$HOME/$perm_file" > /dev/null 2>&1 || { echo -e "\033[0;31m ❌ An error occurred while csetting permission on file $perm_file.\033[0m"; exit 1; }
-    sleep 1
-    echo -e "\n# ASDF" >> $CONFIGFILE
-    sleep 1
-    echo ". $HOME/.asdf/asdf.sh" >> $CONFIGFILE
-    sleep 1
-    echo ". $HOME/.asdf/completions/asdf.bash" >> $CONFIGFILE
-    sleep 1
-    source $CONFIGFILE > /dev/null 2>&1 || { echo -e "\033[0;31m ❌ An error occurred while sourcing the configuration file.\033[0m"; exit 1; }
-    sleep 1
-}
+#get_asdf() {
+#    # Clones the ASDF repository
+#    echo -e "\033[0;33m ⌛ Cloning the ASDF repository...\033[0m"
+#    git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch $ASDF_VERSION > /dev/null 2>&1 || { echo -e "\033[0;31m ❌ An error occurred while cloning the ASDF repository.\033[0m"; exit 1; }
+#}
+#
+#update_asdf() {
+#    echo -e -n "\033[0;36m ASDF is already installed in version $VERSION_FROM_FILE. Do you want to update it to version $ASDF_VERSION? [y/n] " 
+#    read response
+#    if [[ "$response" =~ ^([yY][eE][sS]|[yY]|[oO])$ ]]; then
+#        echo -e "\033[0;33m ⌛ Updating ASDF to version $ASDF_VERSION...\033[0m"
+#        rm -rf "$HOME/.asdf" > /dev/null 2>&1 || { echo -e "\033[0;31m ❌ An error occurred while removing ASDF folder.\033[0m"; exit 1; }
+#        get_asdf
+#    elif [[ "$response" =~ ^([nN][oO]|[nN])$ ]]; then
+#        echo -e "\033[0;36m ⚠️ The installation of ASDF has been canceled.\033[0m"
+#        exit 0
+#    else
+#        echo -e "\033[0;31m ❌ Error: invalid response.\033[0m"
+#        exit 1
+#    fi
+#    echo -e "\033[0;33m ⌛ Updating ASDF to version $ASDF_VERSION...\033[0m"
+#    echo "$SUDO_PASSWORD" | sudo -S rm -rf "$HOME/.asdf" > /dev/null 2>&1 || { echo -e "\033[0;31m ❌ An error occurred while updating ASDF.\033[0m"; exit 1; }
+#    get_asdf
+#}
+#
+#configure_asdf() {
+#    # Adds the ASDF configuration to the shell configuration file
+#    local perm_file=".asdf/asdf.sh"
+#    echo -e "\033[0;33m ⌛ Configuring ASDF...\033[0m"
+#    chmod +x "$HOME/$perm_file" > /dev/null 2>&1 || { echo -e "\033[0;31m ❌ An error occurred while csetting permission on file $perm_file.\033[0m"; exit 1; }
+#    sleep 1
+#    echo -e "\n# ASDF" >> $CONFIGFILE
+#    sleep 1
+#    echo ". $HOME/.asdf/asdf.sh" >> $CONFIGFILE
+#    sleep 1
+#    echo ". $HOME/.asdf/completions/asdf.bash" >> $CONFIGFILE
+#    sleep 1
+#    source $CONFIGFILE > /dev/null 2>&1 || { echo -e "\033[0;31m ❌ An error occurred while sourcing the configuration file.\033[0m"; exit 1; }
+#    sleep 1
+#}
 
 install_asdf_plugins(){
     install_plugins(){
