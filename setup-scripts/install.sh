@@ -79,7 +79,7 @@ welcome(){
         )
         if [[ ! -x "$(command -v brew)" ]]; then
             echo -e "\n\033[0;36m ⚠️ Homebrew is not installed.\n\033[0;33m ⚙️ Installing Homebrew...\033[0m"
-            NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" > /dev/null
+            NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" > /dev/null 2>&1 || echo -e "\033[0;31m ❌ Error: Homebrew could not be installed.\n\033[0m" && exit 1
             echo -e "\033[0;33m ⚙️ Initializing homebrew... \n\033[0m"
             if [ OS == "mac" ]; then
                 config_lines=("${config_lines_macos[@]}")
@@ -90,8 +90,11 @@ welcome(){
                 echo "$line" >> $PROFILE_FILE
                 sleep 1
             done
-            source "$PROFILE_FILE"
+            echo -e "\033[0;33m ⚙️ Reloading shell... \n\033[0m"
+            source "$PROFILE_FILE" > /dev/null
+            sleep 1
             echo -e "\033[0;33m ⚙️ Updating packages... \n\033[0m"
+            brew update > /dev/null || echo -e "\033[0;31m ❌ Error: Homebrew package list could not be updated.\n\033[0m" && exit 1
             echo -e "\033[0;32m ✅ Homebrew has been installed successfully.\n\033[0m"
         else
             echo -e "\033[0;32m ✅ Homebrew is already installed.\n\033[0m"
