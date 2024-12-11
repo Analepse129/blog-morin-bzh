@@ -1,8 +1,16 @@
 #!/bin/bash
 # Global variables & default values
-PACKAGES=(git, curl, wget)
+DEPENDENCIES=(git, curl, wget)
 PROFILE_FILES=(".profile" ".zprofile" ".bash_profile" ".bashrc" ".zshrc" ".config/shellrc")
 HOME_PATH=$HOME
+
+# Packages & definitions
+PACKAGES=(
+    ['oh-my-posh']="eval \$(oh-my-posh init bash)"
+    ['bat']="alias cat='bat'"
+    ['lsd']="alias ls='lsd'"
+    [asdf]=""
+)
 
 # Functions
 welcome(){
@@ -78,7 +86,7 @@ welcome(){
                 config_lines=("${config_lines_linux[@]}")
             fi
             for line in "${config_lines[@]}"; do
-                echo "$line" >> "$PROFILE_FILE"
+                echo "$line" >> $PROFILE_FILE
                 sleep 1
             done
             source "$PROFILE_FILE"
@@ -127,7 +135,7 @@ welcome(){
             exit 1
         else
             PS3=$'\033[0;33m 📄 Select the config file : \033[0m'
-            echo -e "\033[0;36m ℹ️ Select the config file your shell sources between the ${#found_files[@]} options found. Usually ${preferred_option} works well.\033[0;33m"
+            echo -e "\033[0;36m ℹ️ Select the config file your shell sources between the ${#found_files[@]} options found. Usually $preferred_option works well.\033[0;33m"
             select file in "${found_files[@]}"; do
                 case $file in 
                     *)
@@ -168,8 +176,30 @@ welcome(){
     check_homebrew
 }
 
-install_bat() {
-    
+configure_tools() {
+    install_packages(){
+        for package in "${!PACKAGES[@]}"; do
+            echo -e "\033[0;33m ⚙️ Installing $package...\033[0m"
+            brew install $package || echo -e "\033[0;31m ❌ Error: $package could not be installed.\033[0m"
+        done
+    }
+
+    configure_packages(){
+        for package in "${!PACKAGES[@]}"; do
+            echo -e "\033[0;33m ⚙️ Configuring $package...\033[0m"
+            echo "${!PACKAGES[$package]}" >> $PROFILE_FILE || echo -e "\033[0;31m ❌ Error: $package could not be configured.\033[0m"
+            sleep 1
+        done
+    }
+
+    echo -e "\033[0;36m ℹ️ Preparing packages installation...\033[0m"
+    declare -A PACKAGES
+    install_packages
+    configure_packages
+    echo -e "\033[0;33m ⚙️ Reloading the shell...\033[0m"
+    source "$PROFILE_FILE" || echo -e "\033[0;31m ❌ Error: the shell could not be reloaded.\033[0m"
+    echo -e "\033[0;32m ✅ All packages have been installed and configured successfully.\n\033[0m"
 }
 
 welcome
+configure_tools
